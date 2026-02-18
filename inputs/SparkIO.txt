@@ -1,0 +1,86 @@
+package org.frc5902.robot.subsystems.compbot.@NAME@;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Rotation2d;
+
+import java.util.function.DoubleSupplier;
+
+import static org.frc5902.robot.util.SparkUtil.tryUntilOk;
+
+public class @NAME@IOSpark implements @NAME@IO {
+    // hardware
+    public final SparkBase @NAME@;
+    public final RelativeEncoder @NAME@encoder;
+    public final SparkClosedLoopController @NAME@controller;
+    // signals
+    public final DoubleSupplier position;
+    public final DoubleSupplier velocity;
+    public final DoubleSupplier appliedVolts;
+    public final DoubleSupplier temp;
+
+    // outputs
+    public final Debouncer @NAME@ConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
+
+    public @NAME@IOSpark() {
+        @NAME@ = new SparkMax(@NAME@Constants.@NAME@CANID, MotorType.kBrushless);
+        var config = new SparkMaxConfig();
+        config.encoder.positionConversionFactor(@NAME@Constants.@NAME@PositionConversionFactor);
+        config.closedLoop.positionWrappingEnabled(false);
+        config.inverted(@NAME@Constants.inverted)
+                .idleMode(@NAME@Constants.idleMode)
+                .smartCurrentLimit(@NAME@Constants.StallLimit, @NAME@Constants.FreeLimit);
+        config.closedLoop.pid(
+                @NAME@Constants.@NAME@PID.getProportional(),
+                @NAME@Constants.@NAME@PID.getIntegral(),
+                @NAME@Constants.@NAME@PID.getDeriviative());
+
+        tryUntilOk(
+                @NAME@,
+                5,
+                () -> @NAME@.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters));
+        @NAME@encoder = @NAME@.getEncoder();
+        tryUntilOk(@NAME@, 5, () -> @NAME@encoder.setPosition(0.0));
+        @NAME@controller = @NAME@.getClosedLoopController();
+
+        position = () -> @NAME@encoder.getPosition();
+        velocity = () -> @NAME@encoder.getVelocity();
+        appliedVolts = () -> @NAME@.getAppliedOutput();
+        temp = () -> @NAME@.getMotorTemperature();
+    }
+
+    @Override
+    public void updateInputs(@NAME@IOInputs inputs) {
+        inputs.data = new @NAME@IOData(
+                @NAME@ConnectedDebounce.calculate(@NAME@.getLastError() != REVLibError.kOk),
+                Rotation2d.fromRotations(position.getAsDouble()).getRadians(),
+                Rotation2d.fromRotations(velocity.getAsDouble()).getRadians(),
+                appliedVolts.getAsDouble(),
+                temp.getAsDouble());
+    }
+
+    @Override
+    public void runVolts(double volts) {
+        @NAME@.setVoltage(volts);
+    }
+
+    @Override
+    public void runRadiansPerSecond(double radiansPerSecond) {
+        @NAME@controller.setSetpoint(radiansPerSecond, ControlType.kVelocity);
+    }
+
+    @Override
+    public void stop() {
+        @NAME@.stopMotor();
+    }
+}

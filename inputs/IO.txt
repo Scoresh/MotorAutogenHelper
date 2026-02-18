@@ -1,0 +1,25 @@
+package org.frc5902.robot.subsystems.compbot.@NAME@;
+
+import org.littletonrobotics.junction.AutoLog;
+
+public interface @NAME@IO {
+    @AutoLog
+    class @NAME@IOInputs {
+        public @NAME@IOData data = new @NAME@IOData(false, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    record @NAME@IOData(
+            boolean motorConnected,
+            double positionRads,
+            double velocityRadsPerSec,
+            double appliedVoltage,
+            double tempCelsius) {}
+
+    default void updateInputs(@NAME@IOInputs inputs) {}
+
+    default void runVolts(double volts) {}
+
+    default void runRadiansPerSecond(double radiansPerSecond) {}
+
+    default void stop() {}
+}

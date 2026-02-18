@@ -26,13 +26,16 @@ public class Generate {
             fwf.createNewFile();
             FileWriter fw = new FileWriter(fwf);
             while (sc.hasNextLine()){
-                fw.write(
-                    sc.nextLine().replace("@NAME@", name)
-                                 + "\n");
+                fw.write(filter(sc.nextLine()));
             }
             sc.close();
             fw.close();
         }
+    }
+    public static String filter(String n){
+        n = n.replace("@NAME@", name);
+        n = n + "\n";
+        return n;
     }
 
     public static String UPPERFIRSTLETTER(String n){

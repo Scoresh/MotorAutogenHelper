@@ -9,11 +9,11 @@ public class Generate {
 
 
     public static void main(String[] args) throws FileNotFoundException, IOException{
-        name = args[0];
+        name = UPPERFIRSTLETTER(args[0]);
         String inputs = "inputs/";
         String outputPATH = "outputs/" + name + "/";
         String[] names = new String[]{
-            "Constant",
+            "Constants",
             "IO",
             "SparkIO",
             "System"
@@ -21,16 +21,22 @@ public class Generate {
         for (String n : names){
             Scanner sc = new Scanner(new File(inputs + n + ".txt"));
             File filePath = new File(outputPATH);
-            File fwf = new File(outputPATH+ name + n + ".java");
+            File fwf = new File(outputPATH + UPPERFIRSTLETTER(name) + n + ".java");
             filePath.mkdir();
             fwf.createNewFile();
             FileWriter fw = new FileWriter(fwf);
             while (sc.hasNextLine()){
-                fw.write(sc.nextLine().replace("@NAME@", name) + "\n");
+                fw.write(
+                    sc.nextLine().replace("@NAME@", name)
+                                 + "\n");
             }
             sc.close();
             fw.close();
         }
+    }
+
+    public static String UPPERFIRSTLETTER(String n){
+        return n.substring(0,1).toUpperCase() + n.substring(1);
     }
 
 }

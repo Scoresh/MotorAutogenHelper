@@ -18,7 +18,7 @@ import java.util.function.DoubleSupplier;
 
 import static org.frc5902.robot.util.SparkUtil.tryUntilOk;
 
-public class @NAME@IOSpark implements @NAME@IO {
+public class @NAME@SparkIO implements @NAME@IO {
     // hardware
     public final SparkBase @NAME@;
     public final RelativeEncoder @NAME@encoder;
@@ -32,7 +32,7 @@ public class @NAME@IOSpark implements @NAME@IO {
     // outputs
     public final Debouncer @NAME@ConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
-    public @NAME@IOSpark() {
+    public @NAME@SparkIO() {
         @NAME@ = new SparkMax(@NAME@Constants.@NAME@CANID, MotorType.kBrushless);
         var config = new SparkMaxConfig();
         config.encoder.positionConversionFactor(@NAME@Constants.@NAME@PositionConversionFactor);
